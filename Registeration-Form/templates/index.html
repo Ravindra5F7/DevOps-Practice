@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Form</title>
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --error-color: #f44336;
+            --success-color: #4CAF50;
+            --border-color: #ddd;
+            --focus-color: #90caf9;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .form-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 25px;
+            font-size: 24px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 16px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            box-sizing: border-box;
+        }
+        
+        input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+        }
+        
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            background-color: #45a049;
+        }
+        
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        .error {
+            color: var(--error-color);
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        .error-message {
+            color: var(--error-color);
+            font-size: 14px;
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #fdecea;
+            border-radius: 4px;
+            display: none;
+        }
+        
+        .success-message {
+            color: var(--success-color);
+            font-size: 14px;
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #e8f5e9;
+            border-radius: 4px;
+            display: none;
+        }
+        
+        .password-strength {
+            margin-top: 10px;
+            height: 5px;
+            background-color: #eee;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .strength-meter {
+            height: 100%;
+            width: 0;
+            transition: width 0.3s, background-color 0.3s;
+        }
+        
+        .weak {
+            background-color: #ff5252;
+            width: 25%;
+        }
+        
+        .medium {
+            background-color: #ffb74d;
+            width: 50%;
+        }
+        
+        .strong {
+            background-color: #4caf50;
+            width: 75%;
+        }
+        
+        .very-strong {
+            background-color: #2e7d32;
+            width: 100%;
+        }
+        
+        .strength-text {
+            font-size: 12px;
+            margin-top: 5px;
+            color: #666;
+        }
+        
+        @media (max-width: 480px) {
+            .form-container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>Create an Account</h1>
+        
+        <div class="error-message" id="errorMessages"></div>
+        <div class="success-message" id="successMessage"></div>
+        
+        <div class="form-group">
+            <label for="name">Full Name</label>
+            <input type="text" id="name" placeholder="Enter your full name">
+            <div class="error" id="nameError">Please enter your name</div>
+        </div>
+        
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="Create a password">
+            <div class="password-strength">
+                <div class="strength-meter" id="passwordStrengthMeter"></div>
+            </div>
+            <div class="strength-text" id="strengthText"></div>
+            <div class="error" id="passwordError">Password must be at least 8 characters</div>
+        </div>
+        
+        <div class="form-group">
+            <label for="confirmPassword">Confirm Password</label>
+            <input type="password" id="confirmPassword" placeholder="Confirm your password">
+            <div class="error" id="confirmPasswordError">Passwords don't match</div>
+        </div>
+        
+        <button type="submit" id="submitBtn">Register</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const nameInput = document.getElementById('name');
+            const passwordInput = document.getElementById('password');
+            const confirmPasswordInput = document.getElementById('confirmPassword');
+            const submitBtn = document.getElementById('submitBtn');
+            const errorMessages = document.getElementById('errorMessages');
+            const successMessage = document.getElementById('successMessage');
+            
+            // Error elements
+            const nameError = document.getElementById('nameError');
+            const passwordError = document.getElementById('passwordError');
+            const confirmPasswordError = document.getElementById('confirmPasswordError');
+            
+            // Password strength elements
+            const passwordStrengthMeter = document.getElementById('passwordStrengthMeter');
+            const strengthText = document.getElementById('strengthText');
+            
+            // Validate form on submit
+            submitBtn.addEventListener('click', function(event) {
+                event.preventDefault();
+                let isValid = true;
+                errorMessages.style.display = 'none';
+                
+                // Validate name
+                if (nameInput.value.trim() === '') {
+                    nameError.style.display = 'block';
+                    isValid = false;
+                } else {
+                    nameError.style.display = 'none';
+                }
+                
+                // Validate password
+                if (passwordInput.value.length < 8) {
+                    passwordError.style.display = 'block';
+                    isValid = false;
+                } else {
+                    passwordError.style.display = 'none';
+                }
+                
+                // Validate password match
+                if (passwordInput.value !== confirmPasswordInput.value) {
+                    confirmPasswordError.style.display = 'block';
+                    isValid = false;
+                } else {
+                    confirmPasswordError.style.display = 'none';
+                }
+                
+                if (!isValid) {
+                    errorMessages.textContent = 'Please fix the errors below';
+                    errorMessages.style.display = 'block';
+                    return;
+                }
+                
+                // Form is valid
+                successMessage.textContent = 'Registration successful!';
+                successMessage.style.display = 'block';
+                errorMessages.style.display = 'none';
+                
+                // Reset form (optional)
+                setTimeout(() => {
+                    nameInput.value = '';
+                    passwordInput.value = '';
+                    confirmPasswordInput.value = '';
+                    successMessage.style.display = 'none';
+                    passwordStrengthMeter.className = 'strength-meter';
+                    strengthText.textContent = '';
+                }, 2000);
+            });
+            
+            // Real-time password strength check
+            passwordInput.addEventListener('input', function() {
+                const password = passwordInput.value;
+                let strength = 0;
+                let text = '';
+                
+                if (password.length === 0) {
+                    passwordStrengthMeter.className = 'strength-meter';
+                    strengthText.textContent = '';
+                    return;
+                }
+                
+                // Length check
+                if (password.length < 8) {
+                    text = 'Too short';
+                } else {
+                    strength += 1;
+                    
+                    // Contains lowercase
+                    if (/[a-z]/.test(password)) strength += 1;
+                    
+                    // Contains uppercase
+                    if (/[A-Z]/.test(password)) strength += 1;
+                    
+                    // Contains number
+                    if (/[0-9]/.test(password)) strength += 1;
+                    
+                    // Contains special char
+                    if (/[^a-zA-Z0-9]/.test(password)) strength += 1;
+                    
+                    // Determine strength
+                    if (strength < 2) {
+                        passwordStrengthMeter.className = 'strength-meter weak';
+                        text = 'Weak';
+                    } else if (strength < 4) {
+                        passwordStrengthMeter.className = 'strength-meter medium';
+                        text = 'Medium';
+                    } else if (strength < 5) {
+                        passwordStrengthMeter.className = 'strength-meter strong';
+                        text = 'Strong';
+                    } else {
+                        passwordStrengthMeter.className = 'strength-meter very-strong';
+                        text = 'Very Strong';
+                    }
+                }
+                
+                strengthText.textContent = text;
+                
+                // Hide error if password becomes valid
+                if (password.length >= 8) {
+                    passwordError.style.display = 'none';
+                }
+            });
+            
+            // Real-time confirm password check
+            confirmPasswordInput.addEventListener('input', function() {
+                if (passwordInput.value !== confirmPasswordInput.value) {
+                    confirmPasswordError.style.display = 'block';
+                } else {
+                    confirmPasswordError.style.display = 'none';
+                }
+            });
+            
+            // Real-time name validation
+            nameInput.addEventListener('input', function() {
+                if (nameInput.value.trim() !== '') {
+                    nameError.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
